@@ -642,10 +642,12 @@ class WP_Object_Cache {
 
 			if ( empty( $expire ) ) {
 				$this->redis->set( $id, $data );
-				$this->add_data_to_sync( 'set', array( $id, $data ) );
+				// We are going to delete and let the alt-cache re-populate
+				$this->add_data_to_sync( 'delete', array( $id ) );
 			} else {
 				$this->redis->setex( $id, $expire, $data );
-				$this->add_data_to_sync( 'setex', array( $id, $expire, $data ) );
+				// We are going to delete and let the alt-cache re-populate
+				$this->add_data_to_sync( 'delete', array( $id ) );
 			}
 		}
 
