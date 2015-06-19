@@ -201,7 +201,7 @@ function wp_cache_set( $key, $data, $group = '', $expire = 0 ) {
 	global $reiley_wp_cache_set_count;
 	global $reiley_wp_cache_set_timer;
 
-	$reiley_wp_cache_set_count++ += 1;
+	$reiley_wp_cache_set_count += 1;
 
 	$time_begin = microtime(true);
 	$retval = $wp_object_cache->set( $key, $data, $group, (int) $expire );
