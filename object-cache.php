@@ -125,8 +125,18 @@ function wp_cache_flush() {
  */
 function wp_cache_get( $key, $group = '', $force = false, &$found = null ) {
 	global $wp_object_cache;
+	global $reiley_wp_cache_get_count;
+	global $reiley_wp_cache_get_timer;
 
-	return $wp_object_cache->get( $key, $group, $force, $found );
+	$reiley_wp_cache_get_count += 1;
+
+	$time_begin = microtime(true);
+	$retval = $wp_object_cache->get( $key, $group, $force, $found );
+	$time_end = microtime(true);
+
+	$reiley_wp_cache_get_timer += $time_end - $time_begin;
+
+	return $retval;
 }
 
 /**
@@ -188,8 +198,18 @@ function wp_cache_replace( $key, $data, $group = '', $expire = 0 ) {
  */
 function wp_cache_set( $key, $data, $group = '', $expire = 0 ) {
 	global $wp_object_cache;
+	global $reiley_wp_cache_set_count;
+	global $reiley_wp_cache_set_timer;
 
-	return $wp_object_cache->set( $key, $data, $group, (int) $expire );
+	$reiley_wp_cache_set_count++ += 1;
+
+	$time_begin = microtime(true);
+	$retval = $wp_object_cache->set( $key, $data, $group, (int) $expire );
+	$time_end = microtime(true);
+
+	$reiley_wp_cache_set_timer += $time_end - $time_begin;
+
+	return $retval;
 }
 
 /**
@@ -642,12 +662,10 @@ class WP_Object_Cache {
 
 			if ( empty( $expire ) ) {
 				$this->redis->set( $id, $data );
-				// We are going to delete and let the alt-cache re-populate
-				$this->add_data_to_sync( 'delete', array( $id ) );
+				$this->add_data_to_sync( 'set', array( $id, $data ) );
 			} else {
 				$this->redis->setex( $id, $expire, $data );
-				// We are going to delete and let the alt-cache re-populate
-				$this->add_data_to_sync( 'delete', array( $id ) );
+				$this->add_data_to_sync( 'setex', array( $id, $expire, $data ) );
 			}
 		}
 
